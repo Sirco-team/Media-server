@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Media Server</title>
     <link rel="stylesheet" href="/styles.css">
+    <link rel="preload" href="/vid-mov.json" as="fetch" type="application/json" crossorigin>
+    <link rel="icon" type="image/png" href="/favicon.ico">
 </head>
 <body>
     <nav class="top-nav">
@@ -40,7 +42,7 @@
     </div>
 
     <div id="playerModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content scrollable-modal">
             <span class="close">&times;</span>
             <video id="videoPlayer" controls>
                 Your browser does not support the video tag.

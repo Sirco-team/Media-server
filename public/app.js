@@ -202,11 +202,23 @@ class MediaPlayer {
 
     async loadMedia(category = 'all', search = '') {
         try {
-            const params = { category, renderMode: this.renderMode };
-            if (search) params.search = search;
-
-            const response = await fetch('/api/media?' + new URLSearchParams(params));
-            const { data: mediaItems } = await response.json();
+            let mediaItems = null;
+            // Try to load from vid-mov.json for instant frontend load
+            if (!search && category === 'all') {
+                try {
+                    const cacheResp = await fetch('/vid-mov.json');
+                    if (cacheResp.ok) {
+                        mediaItems = await cacheResp.json();
+                    }
+                } catch (e) { mediaItems = null; }
+            }
+            if (!mediaItems) {
+                const params = { category, renderMode: this.renderMode };
+                if (search) params.search = search;
+                const response = await fetch('/api/media?' + new URLSearchParams(params));
+                const { data } = await response.json();
+                mediaItems = data;
+            }
             this.mediaCache = new Map(mediaItems.map(item => [item.id, item]));
             this.renderMediaGrid(mediaItems);
         } catch (error) {

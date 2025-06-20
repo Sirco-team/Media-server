@@ -71,7 +71,31 @@ function scanAndConvertMedia(rootDir) {
     console.log(`[BOOT] Conversion complete. ${converted} file(s) converted, ${skipped} file(s) skipped.`);
 }
 const MEDIA_PATH = path.join(__dirname, 'media');
+const MEDIA_CACHE_PATH = path.join(__dirname, 'vid-mov.json');
+
+function generateMediaCacheFile(mediaList) {
+    try {
+        fs.writeFileSync(MEDIA_CACHE_PATH, JSON.stringify(mediaList, null, 2));
+        console.log(`[BOOT] Media cache written to vid-mov.json (${mediaList.length} items)`);
+    } catch (err) {
+        console.error('[BOOT] Failed to write media cache:', err);
+    }
+}
+
 scanAndConvertMedia(MEDIA_PATH);
+
+// ========== Media Cache Generation on Boot ==========
+async function buildAndCacheMedia() {
+    const mediaScanner = new MediaScanner(MEDIA_PATH);
+    const mediaList = await mediaScanner.scanFolder();
+    generateMediaCacheFile(mediaList);
+    return mediaList;
+}
+
+let mediaCache = [];
+(async () => {
+    mediaCache = await buildAndCacheMedia();
+})();
 
 // ========== User, Favorites, and Progress Management ==========
 function loadUsers() {
@@ -217,6 +241,7 @@ app.post('/api/upload/movie', dynamicBodyParser, upload.fields([
         fs.writeFileSync(path.join(movieFolder, 'config.txt'), configContent);
 
         res.json({ success: true });
+        await refreshMediaCache();
     } catch (error) {
         console.error('Upload error:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -227,7 +252,7 @@ app.post('/api/upload/movie', dynamicBodyParser, upload.fields([
 app.post('/api/upload/show', dynamicBodyParser, upload.fields([
     { name: 'thumbnail', maxCount: 1 },
     { name: 'config', maxCount: 1 }
-]), (req, res) => {
+]), async (req, res) => {
     try {
         const { title, description, genre, year, access } = req.body;
         const showFolder = path.join(__dirname, 'media', title.toLowerCase().replace(/\s+/g, '-'));
@@ -239,6 +264,7 @@ year: ${year}
 access: ${access || 'everyone'}`;
         fs.writeFileSync(path.join(showFolder, 'config.txt'), configContent);
         res.json({ success: true });
+        await refreshMediaCache();
     } catch (error) {
         console.error('Upload error:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -280,6 +306,7 @@ app.post('/api/upload/episode', dynamicBodyParser, upload.fields([
             fs.renameSync(thumbFile.path, destPath);
         }
         res.json({ success: true });
+        await refreshMediaCache();
     } catch (error) {
         console.error('Upload error:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -352,7 +379,7 @@ app.get('/api/media', async (req, res) => {
     try {
         const { category, renderMode, search } = req.query;
         const currentUser = req.session.user?.username || 'everyone';
-        let mediaList = await mediaScanner.scanFolder();
+        let mediaList = mediaCache;
 
         mediaList = mediaList.filter(media => {
             const access = media.access || 'everyone';
@@ -360,7 +387,11 @@ app.get('/api/media', async (req, res) => {
         });
 
         if (search) {
-            mediaList = mediaScanner.searchMedia(search);
+            const q = search.toLowerCase();
+            mediaList = mediaList.filter(media =>
+                (media.title && media.title.toLowerCase().includes(q)) ||
+                (media.description && media.description.toLowerCase().includes(q))
+            );
         }
 
         if (category && category !== 'all') {
