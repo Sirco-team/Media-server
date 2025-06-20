@@ -1,0 +1,114 @@
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #34495e;
+    --accent-color: #3498db;
+    --text-color: #ecf0f1;
+    --background-color: #1a1a1a;
+    --danger-color: #e74c3c;
+    --success-color: #2ecc71;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--background-color); color: var(--text-color); }
+
+.top-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 2rem; background-color: var(--primary-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.search-bar { flex: 1; max-width: 500px; margin: 0 2rem; display: flex; gap: 0.5rem; }
+.search-bar input { flex: 1; padding: 0.5rem 1rem; border: none; border-radius: 20px; background-color: var(--secondary-color); color: var(--text-color);}
+.search-bar button { padding: 0.5rem 1rem; border: none; border-radius: 20px; background-color: var(--accent-color); color: var(--text-color); cursor: pointer;}
+.logo { font-size: 1.5rem; font-weight: bold; }
+.user-menu { display: flex; gap: 1rem; align-items: center; }
+
+.main-container { display: flex; height: calc(100vh - 4rem);}
+.sidebar { width: 250px; background-color: var(--secondary-color); padding: 1rem; display: flex; flex-direction: column; gap: 2rem;}
+.categories { display: flex; flex-direction: column; gap: 0.5rem;}
+.category-btn { padding: 0.5rem 1rem; border: none; background: transparent; color: var(--text-color); text-align: left; cursor: pointer; border-radius: 5px; transition: background-color 0.3s;}
+.category-btn:hover, .category-btn.active { background-color: var(--accent-color);}
+.content { flex-grow: 1; padding: 2rem; overflow-y: auto;}
+.media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 2rem;}
+.media-item { background-color: var(--secondary-color); border-radius: 10px; overflow: hidden; transition: transform 0.3s; cursor: pointer;}
+.media-item:hover { transform: scale(1.05);}
+.media-item img { width: 100%; aspect-ratio: 16/9; object-fit: cover;}
+.media-info { padding: 1rem; }
+
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.9); z-index: 1000;}
+.modal-content { position: relative; width: 90vw; max-width: 1200px; margin: 2rem auto; background: var(--secondary-color); border-radius: 12px; box-shadow: 0 2px 16px #000a;}
+.close { position: absolute; right: 1rem; top: 1rem; color: var(--text-color); font-size: 1.8rem; cursor: pointer; background: none; border: none;}
+.media-details { color: var(--text-color); padding: 2rem;}
+.media-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;}
+.type-badge { background-color: var(--accent-color); padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.9rem;}
+.media-description { margin-bottom: 2rem; }
+.media-player { margin-bottom: 2rem; }
+#videoPlayer { width: 100%; max-height: 80vh; background-color: black; }
+
+.episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem;}
+.season-block { margin-bottom: 2rem; }
+.episode-item { background: var(--secondary-color); border-radius: 6px; cursor: pointer; display: flex; align-items: center; min-height: 48px; justify-content: center; transition: background 0.2s;}
+.episode-item:hover { background: var(--accent-color);}
+.episode-info { padding: 0.8rem; display: flex; flex-direction: row; align-items: center; gap: 0.7rem;}
+.ep-status { margin-left: 0.6em; font-size: 1.2em;}
+.ep-status.complete { color: var(--success-color);}
+.ep-status.progress { color: var(--accent-color);}
+.seasons-list h3 { margin-bottom: 0.5rem;}
+#dynamicPlayer { margin-top: 1.5rem; }
+
+.main-btn, .modal .close, .favorite-btn, .category-btn, .upload-tabs button, .upload-form button, #settingsBtn, #authBtn, #logoutBtn, #uploadBtn {
+    font-family: inherit;
+    padding: 0.6rem 1.3rem;
+    background: var(--accent-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: 6px;
+    margin: 0.2rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 6px #0002;
+    outline: none;
+    display: inline-block;
+}
+.main-btn:hover, .upload-tabs button:hover, .upload-form button:hover, #settingsBtn:hover, #authBtn:hover, #logoutBtn:hover, #uploadBtn:hover {
+    background: var(--primary-color);
+}
+.favorite-btn.active, .main-btn.active { background: var(--success-color); color: #fff;}
+.favorite-btn { font-size: 1.3em; background: transparent; color: var(--danger-color);}
+.favorite-btn:hover { color: var(--accent-color);}
+.upload-tabs button.active { background: var(--accent-color); color: #fff;}
+
+.upload-container { padding: 2rem; color: var(--text-color);}
+.upload-tabs { display: flex; gap: 1rem; margin-bottom: 2rem;}
+.upload-form { display: flex; flex-direction: column; gap: 1rem;}
+.upload-form input, .upload-form textarea, .upload-form select { padding: 0.8rem; background: var(--secondary-color); border: 1px solid var(--accent-color); color: var(--text-color); border-radius: 5px;}
+.upload-form textarea { min-height: 100px; resize: vertical;}
+.upload-form button { padding: 0.8rem; background: var(--accent-color); border: none; color: var(--text-color); cursor: pointer; border-radius: 5px;}
+.episode-upload-container { display: flex; flex-direction: column; gap: 1rem;}
+.episode-upload { display: grid; grid-template-columns: auto 1fr 1fr; gap: 1rem; align-items: center; padding: 1rem; background: var(--secondary-color); border-radius: 5px;}
+
+.auth-container { padding: 2rem; color: var(--text-color);}
+.auth-buttons { display: flex; gap: 1rem; margin-bottom: 2rem;}
+.auth-buttons button { padding: 0.5rem 1rem; background: var(--secondary-color); border: none; color: var(--text-color); cursor: pointer; border-radius: 5px;}
+.auth-buttons button.active { background: var(--accent-color);}
+#loginForm, #signupForm { display: flex; flex-direction: column; gap: 1rem;}
+#loginForm input, #signupForm input { padding: 0.8rem; border: 1px solid var(--secondary-color); background: var(--background-color); color: var(--text-color); border-radius: 5px;}
+#loginForm button, #signupForm button { padding: 0.8rem; background: var(--accent-color); border: none; color: var(--text-color); cursor: pointer; border-radius: 5px;}
+
+.setting-item { margin: 1rem 0; display: flex; flex-direction: column; gap: 0.5rem;}
+.setting-item input, .setting-item select { padding: 0.5rem; background: var(--background-color); border: 1px solid var(--secondary-color); color: var(--text-color); border-radius: 5px;}
+
+@media (max-width: 900px) {
+    .main-container { flex-direction: column;}
+    .sidebar { width: 100%; order: 1; min-width: unset; padding: 0.5rem;}
+    .content { padding: 1rem; order: 2;}
+    .media-grid, .episodes-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem;}
+    .modal-content { width: 98vw; margin: 1vw auto; padding:0.5rem; max-width: 100vw;}
+    .media-details { padding: 1rem;}
+}
+@media (max-width: 600px) {
+    .top-nav, .sidebar, .content { padding: 0.5rem;}
+    .media-item img, .episode-item img { aspect-ratio: 16/9; max-height: 90px; object-fit: cover;}
+    .media-info h3, .episode-info h4 { font-size: 1rem;}
+    .episodes-grid { grid-template-columns: repeat(2, 1fr);}
+}
