@@ -119,6 +119,11 @@ class MediaPlayer {
                 console.error('Logout error:', error);
             }
         });
+
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            const activeCategory = document.querySelector('.category-btn.active').dataset.category;
+            this.loadMedia(activeCategory, '');
+        });
     }
 
     setupAuthListeners() {
@@ -218,6 +223,27 @@ class MediaPlayer {
                 const response = await fetch('/api/media?' + new URLSearchParams(params));
                 const { data } = await response.json();
                 mediaItems = data;
+            }
+            // Filter by access
+            mediaItems = mediaItems.filter(item => {
+                const access = item.access || 'everyone';
+                return access === 'everyone' || access === this.currentUser.username;
+            });
+            // Category filtering
+            if (category === 'movies') {
+                mediaItems = mediaItems.filter(item => item.type === 'movie');
+            } else if (category === 'shows') {
+                mediaItems = mediaItems.filter(item => item.type === 'show');
+            } else if (category === 'favorites') {
+                mediaItems = mediaItems.filter(item => this.favorites.has(item.id));
+            }
+            // Search filtering (if not handled by API)
+            if (search) {
+                const q = search.toLowerCase();
+                mediaItems = mediaItems.filter(item =>
+                    (item.title && item.title.toLowerCase().includes(q)) ||
+                    (item.description && item.description.toLowerCase().includes(q))
+                );
             }
             this.mediaCache = new Map(mediaItems.map(item => [item.id, item]));
             this.renderMediaGrid(mediaItems);

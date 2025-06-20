@@ -1,7 +1,0 @@
-title: Studio Apartment, Good Lighting, Angel Included
-type: show
-description: Studio Apartment, Good Lighting, Angel Included
-genre: Angels, Based On A Manga, Comedy, Non-human Protagonists, Romance, Roommates, Shounen, Supernatural
-year: 2024
-seasons: 1
-access: g

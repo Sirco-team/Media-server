@@ -16,6 +16,11 @@ function checkFfmpegInstalled() {
         return true;
     } catch (err) {
         console.error('[BOOT] FFmpeg is NOT installed! Please install ffmpeg before running this server.');
+        console.error('[BOOT] Example install commands:');
+        console.error('  Ubuntu/Debian:   sudo apt update && sudo apt install ffmpeg');
+        console.error('  Fedora:          sudo dnf install ffmpeg');
+        console.error('  Mac (Homebrew):  brew install ffmpeg');
+        console.error('  Windows:         choco install ffmpeg   (or download from ffmpeg.org)');
         process.exit(1);
     }
 }
@@ -573,6 +578,16 @@ app.get('/api/media/:id/stream', async (req, res) => {
             'Content-Type': 'video/mp4'
         });
         fs.createReadStream(videoPath).pipe(res);
+    }
+});
+
+// Serve vid-mov.json at root for frontend instant load
+app.get('/vid-mov.json', (req, res) => {
+    const cachePath = path.join(__dirname, 'vid-mov.json');
+    if (fs.existsSync(cachePath)) {
+        res.sendFile(cachePath);
+    } else {
+        res.status(404).json({ success: false, message: 'vid-mov.json not found' });
     }
 });
 

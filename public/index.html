@@ -12,6 +12,7 @@
     <nav class="top-nav">
         <div class="logo">Media Server</div>
         <div class="search-bar">
+            <button id="refreshBtn" title="Refresh" style="margin-right:0.5rem;"><i class="fas fa-sync-alt"></i></button>
             <input type="text" id="searchInput" placeholder="Search media...">
             <button id="searchBtn"><i class="fas fa-search"></i></button>
         </div>
@@ -27,10 +28,10 @@
     <div class="main-container">
         <aside class="sidebar">
             <div class="categories">
-                <button class="category-btn active" data-category="all">All</button>
-                <button class="category-btn" data-category="movies">Movies</button>
-                <button class="category-btn" data-category="shows">TV Shows</button>
-                <button class="category-btn" data-category="favorites">Favorites</button>
+                <button class="category-btn active" data-category="all"><i class="fas fa-th-large"></i> All</button>
+                <button class="category-btn" data-category="movies"><i class="fas fa-film"></i> Movies</button>
+                <button class="category-btn" data-category="shows"><i class="fas fa-tv"></i> TV Shows</button>
+                <button class="category-btn" data-category="favorites"><i class="fas fa-heart"></i> Favorites</button>
             </div>
         </aside>
 
