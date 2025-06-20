@@ -31,7 +31,16 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-
 .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 2rem;}
 .media-item { background-color: var(--secondary-color); border-radius: 10px; overflow: hidden; transition: transform 0.3s; cursor: pointer;}
 .media-item:hover { transform: scale(1.05);}
-.media-item img { width: 100%; aspect-ratio: 16/9; object-fit: cover;}
+.media-item img, .episode-item img {
+    width: 100%;
+    height: 250px;
+    max-width: 100%;
+    max-height: 375px;
+    object-fit: cover;
+    border-radius: 0;
+    display: block;
+    background: #222;
+}
 .media-info { padding: 1rem; }
 
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.9); z-index: 1000;}
@@ -112,10 +121,17 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-
     .modal-content, .scrollable-modal { width: 98vw; margin: 1vw auto; padding:0.5rem; max-width: 100vw; max-height: 98vh;}
     .media-details { padding: 1rem;}
     .modal-content, .scrollable-modal { box-sizing: border-box; }
+    .media-item img, .episode-item img {
+        height: 180px;
+        max-height: 270px;
+    }
 }
 @media (max-width: 600px) {
     .top-nav, .sidebar, .content { padding: 0.5rem;}
-    .media-item img, .episode-item img { aspect-ratio: 16/9; max-height: 90px; object-fit: cover;}
+    .media-item img, .episode-item img {
+        height: 120px;
+        max-height: 180px;
+    }
     .media-info h3, .episode-info h4 { font-size: 1rem;}
     .episodes-grid { grid-template-columns: repeat(2, 1fr);}
     .modal-content, .scrollable-modal { width: 100vw; max-width: 100vw; max-height: 100vh; padding: 0.2rem; }
