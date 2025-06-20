@@ -31,7 +31,7 @@ def fetch_movie_info(title):
             movie = results[0]
             return {
                 "title": movie["title"],
-                "description": movie["overview"][:15] + ".." if len(movie["overview"]) > 17 else movie["overview"],
+                "description": movie["overview"][:17] + ".." if len(movie["overview"]) > 19 else movie["overview"],
                 "year": movie.get("release_date", "0000")[:4],
                 "poster_path": movie.get("poster_path")
             }
