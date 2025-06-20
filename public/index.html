@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Media Server</title>
     <link rel="stylesheet" href="/styles.css">
-    <link rel="preload" href="/vid-mov.json" as="fetch" type="application/json" crossorigin>
     <link rel="icon" type="image/png" href="/favicon.ico">
 </head>
 <body>
@@ -104,7 +103,7 @@
                     <button id="episodeUploadBtn">Upload Episodes</button>
                 </div>
 
-                <form id="showUploadForm" class="upload-form">
+                <form class="showUploadForm upload-form">
                     <h3>Upload TV Show</h3>
                     <input type="text" name="title" placeholder="Show Title" required>
                     <textarea name="description" placeholder="Description" required></textarea>
@@ -115,7 +114,7 @@
                     <button type="submit">Create Show</button>
                 </form>
 
-                <form id="movieUploadForm" class="upload-form" style="display: none;">
+                <form class="movieUploadForm upload-form" style="display: none;">
                     <h3>Upload Movie</h3>
                     <input type="text" name="title" placeholder="Movie Title" required>
                     <textarea name="description" placeholder="Description" required></textarea>
@@ -127,9 +126,9 @@
                     <button type="submit">Upload Movie</button>
                 </form>
 
-                <form id="episodeUploadForm" class="upload-form" style="display: none;">
+                <form class="episodeUploadForm upload-form" style="display: none;">
                     <h3>Upload Episodes</h3>
-                    <select name="showName" id="showSelect" required>
+                    <select name="showName" class="showSelect" required>
                         <option value="">Select Show</option>
                     </select>
                     <div class="episode-upload-container">
@@ -139,7 +138,7 @@
                             <input type="file" name="thumbnail" accept="image/*">
                         </div>
                     </div>
-                    <button type="button" id="addMoreEpisodes">Add Another Episode</button>
+                    <button type="button" class="addMoreEpisodesBtn">Add Another Episode</button>
                     <button type="submit">Upload Episodes</button>
                 </form>
             </div>

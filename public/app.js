@@ -5,15 +5,31 @@ class MediaPlayer {
     favorites = new Set();
     progress = new Map();
     mediaCache = new Map();
+    vidMovCache = null;
 
     constructor() {
-        this.checkSession().then(() => {
-            this.setupEventListeners();
-            this.setupAuthListeners();
-            this.loadFavorites();
-            this.loadProgress();
-            this.loadMedia();
+        // Fetch vid-mov.json immediately so preload is used
+        this.vidMovCache = null;
+        this.fetchVidMovJson().then(() => {
+            this.checkSession().then(() => {
+                this.setupEventListeners();
+                this.setupAuthListeners();
+                this.loadFavorites();
+                this.loadProgress();
+                this.loadMedia();
+            });
         });
+    }
+
+    async fetchVidMovJson() {
+        try {
+            const resp = await fetch('/vid-mov.json');
+            if (resp.ok) {
+                this.vidMovCache = await resp.json();
+            }
+        } catch (e) {
+            this.vidMovCache = null;
+        }
     }
 
     async checkSession() {
@@ -208,8 +224,10 @@ class MediaPlayer {
     async loadMedia(category = 'all', search = '') {
         try {
             let mediaItems = null;
-            // Try to load from vid-mov.json for instant frontend load
-            if (!search && category === 'all') {
+            // Use pre-fetched vid-mov.json if available
+            if (!search && category === 'all' && this.vidMovCache) {
+                mediaItems = this.vidMovCache;
+            } else if (!search && category === 'all') {
                 try {
                     const cacheResp = await fetch('/vid-mov.json');
                     if (cacheResp.ok) {
@@ -257,12 +275,25 @@ class MediaPlayer {
         grid.innerHTML = '';
         if (!Array.isArray(mediaItems)) return;
         mediaItems.forEach(item => {
+            // Progress logic for movies
+            let progress = this.getProgress(item.id);
+            let statusIcon = '';
+            if (item.duration && progress > 0) {
+                const percent = progress / item.duration;
+                if (percent >= 0.95) {
+                    statusIcon = '<span class="ep-status complete" title="Watched"><i class="fas fa-check"></i></span>';
+                } else if (percent > 0.01) {
+                    statusIcon = '<span class="ep-status progress" title="In Progress"><i class="fas fa-spinner fa-spin"></i></span>';
+                }
+            } else if (progress > 0) {
+                statusIcon = '<span class="ep-status progress" title="In Progress"><i class="fas fa-spinner fa-spin"></i></span>';
+            }
             const mediaElement = document.createElement('div');
             mediaElement.className = 'media-item';
             mediaElement.innerHTML = `
                 <img src="/api/media/${item.id}/thumbnail" alt="${item.title}">
                 <div class="media-info">
-                    <h3>${item.title}</h3>
+                    <h3>${item.title} ${statusIcon}</h3>
                     <p>${item.description || ''}</p>
                 </div>
             `;
@@ -383,34 +414,32 @@ class MediaPlayer {
 
     renderSeasonList(media) {
         if (!media.seasons) return '';
-        let html = `<div class="seasons-list">`;
+        let html = '<div class="seasons-list">';
         Object.keys(media.seasons).sort((a, b) => a - b).forEach(seasonNum => {
-            html += `<div class="season-block"><h3>Season ${seasonNum}</h3><div class="episodes-grid">`;
+            html += '<div class="season-block"><h3>Season ' + seasonNum + '</h3><div class="episodes-grid">';
             media.seasons[seasonNum].forEach(ep => {
                 const prog = this.getProgress(media.id, seasonNum, ep.number);
                 let icon = '';
                 if (ep.duration && prog > 0) {
                     const percent = prog / ep.duration;
-                    if (percent >= 0.85) {
-                        icon = `<span class="ep-status complete"><i class="fas fa-check"></i></span>`;
+                    if (percent >= 0.95) {
+                        icon = '<span class="ep-status complete" title="Watched"><i class="fas fa-check"></i></span>';
                     } else if (percent > 0.01) {
-                        icon = `<span class="ep-status progress"><i class="fas fa-spinner fa-spin"></i></span>`;
+                        icon = '<span class="ep-status progress" title="In Progress"><i class="fas fa-spinner fa-spin"></i></span>';
                     }
                 } else if(prog > 0) {
-                    icon = `<span class="ep-status progress"><i class="fas fa-spinner fa-spin"></i></span>`;
+                    icon = '<span class="ep-status progress" title="In Progress"><i class="fas fa-spinner fa-spin"></i></span>';
                 }
-                html += `
-                    <div class="episode-item" onclick="player.playEpisode('${media.id}', '${seasonNum}', '${ep.number}')">
-                        <div class="episode-info">
-                            <h4>Ep ${ep.number}</h4>
-                            ${icon}
-                        </div>
-                    </div>
-                `;
+                html +=
+                    '<div class="episode-item" onclick="player.playEpisode(\'' + media.id + '\', \'" + seasonNum + "\', \'" + ep.number + "\')">' +
+                        '<div class="episode-info">' +
+                            '<h4>Ep ' + ep.number + ' ' + icon + '</h4>' +
+                        '</div>' +
+                    '</div>';
             });
-            html += `</div></div>`;
+            html += '</div></div>';
         });
-        html += `</div><div id="dynamicPlayer"></div>`;
+        html += '</div><div id="dynamicPlayer"></div>';
         return html;
     }
 
@@ -432,6 +461,12 @@ class MediaPlayer {
         if (prog > 0) {
             video.currentTime = prog;
         }
+        // Save progress every 10 seconds
+        if (this._progressInterval) clearInterval(this._progressInterval);
+        this._progressInterval = setInterval(() => {
+            this.saveProgress(mediaId, season, episode, video.currentTime, video.duration);
+        }, 10000);
+        // Save on pause, ended, and timeupdate (for next ep)
         video.onpause = () => this.saveProgress(mediaId, season, episode, video.currentTime, video.duration);
         video.onended = () => this.saveProgress(mediaId, season, episode, video.currentTime, video.duration);
         video.ontimeupdate = () => {
@@ -440,6 +475,16 @@ class MediaPlayer {
             }
         };
         video.play();
+        // Save progress when closing modal
+        const closeBtn = modal.querySelector('.close');
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                this.saveProgress(mediaId, season, episode, video.currentTime, video.duration);
+                this.stopVideo();
+                modal.style.display = 'none';
+                if (this._progressInterval) clearInterval(this._progressInterval);
+            };
+        }
     }
 
     stopVideo() {
@@ -447,11 +492,11 @@ class MediaPlayer {
         if (video) video.pause();
         const dynamicPlayer = document.getElementById('dynamicPlayer');
         if (dynamicPlayer) dynamicPlayer.innerHTML = '';
+        if (this._progressInterval) clearInterval(this._progressInterval);
     }
 
     // ... keep your upload logic (populateShowDropdown, upload handlers, etc.) ...
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    window.player = new MediaPlayer();
-});
+// Only one MediaPlayer instance, no extra braces or code block markers
+window.player = new MediaPlayer();
